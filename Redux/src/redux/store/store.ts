@@ -3,10 +3,12 @@ import counterSlice from '../slice/CounterSlice';
 import authSlice from '../slice/AuthSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistReducer, persistStore } from 'redux-persist';
+import productSlice from '../slice/ProductSlice';
 
 const reducers = combineReducers({
   counter: counterSlice,
   auth: authSlice,
+  products: productSlice,
 });
 
 const persistConfig = {
