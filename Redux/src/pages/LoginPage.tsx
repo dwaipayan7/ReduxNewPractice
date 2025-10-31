@@ -1,10 +1,11 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../redux/slice/AuthSlice';
+import { RootState } from '../redux/store/store';
 
 // export type RootStackParamList = {
 //     Login: undefined;
@@ -18,6 +19,7 @@ const LoginPage = () => {
     // const navigation = useNavigation<LoginScreenNavigationProp>()
 
     const dispatch = useDispatch<any>();
+    const isLoading = useSelector((state: RootState) => state.auth.isLoading);
 
     const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
@@ -32,6 +34,10 @@ const LoginPage = () => {
         // navigation.navigate('MainTabs')
 
     }
+
+    // if (isLoading) {
+
+    // }
 
     return (
         <View style={styles.container}>
@@ -53,9 +59,13 @@ const LoginPage = () => {
                 style={styles.input}
             />
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.login}>Login</Text>
-            </TouchableOpacity>
+            <View>
+                {!isLoading ? (
+                    <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                        <Text style={styles.login}>Login</Text>
+                    </TouchableOpacity>
+                ) : <ActivityIndicator size='small' color={'blue'} />}
+            </View>
         </View>
     )
 }
