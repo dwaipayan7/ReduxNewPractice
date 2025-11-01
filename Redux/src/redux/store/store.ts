@@ -4,11 +4,13 @@ import authSlice from '../slice/AuthSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import productSlice from '../slice/ProductSlice';
+import cartSlice from '../slice/CartSlice'
 
 const reducers = combineReducers({
   counter: counterSlice,
   auth: authSlice,
   products: productSlice,
+  cart: cartSlice,
 });
 
 const persistConfig = {

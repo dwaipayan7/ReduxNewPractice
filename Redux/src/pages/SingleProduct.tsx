@@ -9,27 +9,47 @@ import {
 import React from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../redux/slice/CartSlice';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/AppNavigation';
+import { RootState } from '../redux/store/store';
 
+
+type SingleProductNavigationProp = StackNavigationProp<RootStackParamList, 'SingleProduct'>;
 
 const SingleProduct = () => {
-    // hooks
+
+    const navigation = useNavigation<SingleProductNavigationProp>();
+
+    const dispatch = useDispatch();
+
     const {
-        params: { Product },
+        params: { item },
     } = useRoute<any>();
-    // const { navigate } = useNavigation();
+
+    const Product = item;
+
+    const handleAddToCart = () => {
+        dispatch(addToCart(Product))
+    }
+
+    const { cartData, totalAmount } = useSelector((state: RootState) => state.cart)
+
+    console.log("The cartdata is: ", cartData, "Total Amount is: ", totalAmount);
+
 
     return (
         <View style={styles.container}>
             <SafeAreaView />
-       
-            {/* Card */}
+
             <View style={styles.cardBox}>
-                <Image source={{ uri: Product.thumbnail }} style={styles.img} />
+                <Image source={{ uri: Product.images[0] }} style={styles.img} />
                 <View style={styles.textBox}>
                     <Text style={styles.title}>{Product.title}</Text>
                     <Text style={styles.price}>${Product.price}</Text>
                 </View>
-                {/* body */}
+
                 <View style={styles.body}>
                     <Text style={styles.label}>
                         Category: <Text style={styles.value}>{Product.category}</Text>
@@ -47,34 +67,16 @@ const SingleProduct = () => {
                         Stock: <Text style={styles.value}>{Product.stock}</Text>
                     </Text>
                 </View>
+
                 <View style={styles.footer}>
-                    {false ? (
-                        <View style={styles.twoBtn}>
-                            <Pressable style={styles.btnBox} onPress={() => { }}>
-                                <Text style={styles.btn}>-</Text>
-                            </Pressable>
-                            <Pressable>
-                                <Text style={styles.btn}>0</Text>
-                            </Pressable>
-                            <Pressable style={styles.btnBox} onPress={() => { }}>
-                                <Text style={styles.btn}>+</Text>
-                            </Pressable>
-                        </View>
-                    ) : (
-                        // <MyButton onPress={() => { }} title="Add to Cart" />
-
-                        <TouchableOpacity onPress={() => {}}>
-                            <Text>
-                                Add to Cart
-                            </Text>
-                        </TouchableOpacity>
-
-                    )}
-                   <TouchableOpacity onPress={() => {}}>
-                            <Text>
-                                View Cart
-                            </Text>
-                        </TouchableOpacity>
+                    <TouchableOpacity onPress={() =>
+                        handleAddToCart()
+                    } style={styles.button}>
+                        <Text style={styles.buttonText}>Add to Cart</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.button}>
+                        <Text style={styles.buttonText}>View Cart</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </View>
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
     img: {
         width: '100%',
         height: 200,
-        resizeMode: 'cover',
+        resizeMode: 'contain',
         borderRadius: 20,
     },
     title: {
@@ -125,22 +127,18 @@ const styles = StyleSheet.create({
         marginTop: 50,
         gap: 10,
     },
-    twoBtn: {
-        columnGap: 20,
-        flexDirection: 'row',
-        marginVertical: 22,
-        alignItems: 'center',
-        alignSelf: 'center',
-    },
-    btnBox: {
-        width: 40,
+    button: {
+        paddingHorizontal: 20,
+        width: '100%',
         height: 40,
-        backgroundColor: 'lightgrey',
-        alignItems: 'center',
+        backgroundColor: 'blue',
+        borderRadius: 24,
         justifyContent: 'center',
-        borderRadius: 25,
+        alignItems: 'center'
     },
-    btn: {
-        fontSize: 30,
-    },
+    buttonText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'white'
+    }
 });
