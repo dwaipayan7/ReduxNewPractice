@@ -6,11 +6,11 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../redux/slice/CartSlice';
+import { addToCart, removeFromCart } from '../redux/slice/CartSlice';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigation';
 import { RootState } from '../redux/store/store';
@@ -19,6 +19,8 @@ import { RootState } from '../redux/store/store';
 type SingleProductNavigationProp = StackNavigationProp<RootStackParamList, 'SingleProduct'>;
 
 const SingleProduct = () => {
+
+    const [currentItem, setCurrentItem] = useState({})
 
     const navigation = useNavigation<SingleProductNavigationProp>();
 
@@ -34,9 +36,25 @@ const SingleProduct = () => {
         dispatch(addToCart(Product))
     }
 
+    const handleRemoveFromCart = () => {
+        dispatch(removeFromCart(Product));
+    }
+
     const { cartData, totalAmount } = useSelector((state: RootState) => state.cart)
 
     console.log("The cartdata is: ", cartData, "Total Amount is: ", totalAmount);
+
+    useEffect(() => {
+        const itemChecking = () => {
+            const itemAvailable = cartData?.find(value => value.id === Product.id);
+            if (itemAvailable) {
+                setCurrentItem(itemAvailable)
+            } else {
+                setCurrentItem({})
+            }
+        }
+        itemChecking();
+    }, [cartData])
 
 
     return (
@@ -69,12 +87,37 @@ const SingleProduct = () => {
                 </View>
 
                 <View style={styles.footer}>
-                    <TouchableOpacity onPress={() =>
-                        handleAddToCart()
-                    } style={styles.button}>
-                        <Text style={styles.buttonText}>Add to Cart</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.button}>
+                    {currentItem?.quantity > 0 ? (
+                        <View style={styles.quantityBox}>
+                            <TouchableOpacity
+                                onPress={handleRemoveFromCart}
+                                style={styles.quantityBtn}
+                            >
+                                <Text style={styles.quantityText}>-</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.quantityCount}>
+                                {currentItem.quantity}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={handleAddToCart}
+                                style={styles.quantityBtn}
+                            >
+                                <Text style={styles.quantityText}>+</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            onPress={handleAddToCart}
+                            style={styles.button}
+                        >
+                            <Text style={styles.buttonText}>Add to Cart</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Cart')}
+                        style={[styles.button, { backgroundColor: 'green' }]}
+                    >
                         <Text style={styles.buttonText}>View Cart</Text>
                     </TouchableOpacity>
                 </View>
@@ -140,5 +183,26 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: 'white'
-    }
+    },
+    quantityBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 15,
+        marginVertical: 10,
+    },
+    quantityBtn: {
+        backgroundColor: '#ccc',
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        borderRadius: 20,
+    },
+    quantityText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    quantityCount: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
 });

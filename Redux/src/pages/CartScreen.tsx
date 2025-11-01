@@ -8,85 +8,78 @@ import {
     View,
 } from 'react-native';
 import React from 'react';
-// import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../redux/store/store';
+import { addToCart, removeFromCart } from '../redux/slice/CartSlice';
 
 const CartScreen = () => {
-    // hooks
-    // const { navigate } = useNavigation();
+    const dispatch = useDispatch();
+    const { cartData, totalAmount } = useSelector(
+        (state: RootState) => state.cart
+    );
 
-    // functions
     const handleCheckout = () => {
-        Alert.alert('Order Success', 'Your order place successfully', [
-            // { text: 'OK', onPress: () => navigate('') },
-        ]);
+        Alert.alert('Order Success', 'Your order has been placed successfully');
     };
-
-    // data
-    const data = [
-        {
-            id: 1,
-            title: 'iPhone 9',
-            description: 'An apple mobile which is nothing like apple',
-            price: 549,
-            discountPercentage: 12.96,
-            rating: 4.69,
-            stock: 94,
-            brand: 'Apple',
-            category: 'smartphones',
-            thumbnail: 'https://i.dummyjson.com/data/products/1/thumbnail.jpg',
-            images: [
-                'https://i.dummyjson.com/data/products/1/1.jpg',
-                'https://i.dummyjson.com/data/products/1/2.jpg',
-                'https://i.dummyjson.com/data/products/1/3.jpg',
-                'https://i.dummyjson.com/data/products/1/4.jpg',
-                'https://i.dummyjson.com/data/products/1/thumbnail.jpg',
-            ],
-        },
-    ];
 
     return (
         <View style={styles.mainContainer}>
             <SafeAreaView />
             <View style={styles.container}>
-                {/* <MyBackButton /> */}
                 <FlatList
-                    data={data}
+                    data={cartData}
+                    keyExtractor={(item) => item.id.toString()}
+                    showsVerticalScrollIndicator={false}
                     style={styles.flatlistStyle}
-                    renderItem={({ item, index }) => {
-                        return (
-                            <View style={styles.cardBox} key={item.id}>
-                                <View style={styles.innerContainer}>
-                                    <Image source={{ uri: item.thumbnail }} style={styles.img} />
-                                    <View>
-                                        <Text style={styles.title}>{item.title}</Text>
-                                        <Text style={styles.price}>${item.price}</Text>
-                                    </View>
-                                </View>
-                                <View style={styles.twoBtn}>
-                                    <Pressable style={styles.btnBox} onPress={() => { }}>
-                                        <Text style={styles.btn}>-</Text>
-                                    </Pressable>
-                                    <Pressable>
-                                        {/* <Text style={styles.amount}>{item.quantity}</Text> */}
-                                    </Pressable>
-                                    <Pressable style={styles.btnBox} onPress={() => { }}>
-                                        <Text style={styles.btn}>+</Text>
-                                    </Pressable>
+                    ListEmptyComponent={() => (
+                        <Text style={styles.emptyText}>Your cart is empty 🛒</Text>
+                    )}
+                    renderItem={({ item }) => (
+                        <View style={styles.cardBox}>
+                            <View style={styles.innerContainer}>
+                                <Image
+                                    source={{ uri: item.thumbnail || item.images?.[0] }}
+                                    style={styles.img}
+                                />
+                                <View>
+                                    <Text style={styles.title}>{item.title}</Text>
+                                    <Text style={styles.price}>${item.price}</Text>
                                 </View>
                             </View>
-                        );
-                    }}
+
+                            <View style={styles.twoBtn}>
+                                <Pressable
+                                    style={styles.btnBox}
+                                    onPress={() => dispatch(removeFromCart(item))}
+                                >
+                                    <Text style={styles.btn}>-</Text>
+                                </Pressable>
+
+                                <Text style={styles.amount}>{item.quantity}</Text>
+
+                                <Pressable
+                                    style={styles.btnBox}
+                                    onPress={() => dispatch(addToCart(item))}
+                                >
+                                    <Text style={styles.btn}>+</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    )}
                 />
             </View>
+
+            {/* Footer */}
             <View style={styles.bottom}>
                 <Text style={styles.totalAmount}>
                     Total Amount:{'  '}
-                    <Text style={styles.totalAmountPrice}>0$</Text>
+                    <Text style={styles.totalAmountPrice}>${totalAmount}</Text>
                 </Text>
 
-                {/* <MyButton onPress={handleCheckout} title="Proceed to checkout" /> */}
+                <Pressable style={styles.checkoutBtn} onPress={handleCheckout}>
+                    <Text style={styles.checkoutText}>Proceed to Checkout</Text>
+                </Pressable>
             </View>
         </View>
     );
@@ -97,6 +90,7 @@ export default CartScreen;
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
+        backgroundColor: '#f9f9f9',
     },
     container: {
         flex: 1,
@@ -106,43 +100,37 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     img: {
-        width: 120,
-        height: 120,
+        width: 100,
+        height: 100,
         resizeMode: 'cover',
         borderRadius: 10,
     },
     title: {
         fontSize: 16,
         fontWeight: 'bold',
-        marginTop: 10,
+        marginTop: 5,
     },
     price: {
-        fontSize: 16,
-        marginTop: 10,
+        fontSize: 15,
+        marginTop: 5,
     },
     cardBox: {
-        marginBottom: 30,
+        marginBottom: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
         backgroundColor: 'white',
-        paddingRight: 10,
+        padding: 10,
         borderRadius: 10,
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
         shadowRadius: 3.84,
-
-        elevation: 5,
+        elevation: 3,
     },
     innerContainer: {
         flexDirection: 'row',
         gap: 10,
-    },
-    footer: {
-        width: '55%',
+        alignItems: 'center',
     },
     twoBtn: {
         gap: 5,
@@ -150,44 +138,63 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     btnBox: {
-        width: 40,
-        height: 40,
-        backgroundColor: 'lightgrey',
+        width: 35,
+        height: 35,
+        backgroundColor: '#e6e6e6',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 25,
     },
     btn: {
-        fontSize: 25,
+        fontSize: 22,
+        fontWeight: 'bold',
     },
     amount: {
         fontSize: 16,
+        fontWeight: 'bold',
     },
     bottom: {
-        flex: 0.2,
-        gap: 10,
+        flex: 0.25,
         paddingHorizontal: '5%',
         backgroundColor: 'white',
         borderTopLeftRadius: 25,
-        borderTopRightRadius: 35,
-        alignItems: 'center',
+        borderTopRightRadius: 25,
         justifyContent: 'center',
-        // backgroundColor: 'white',
+        alignItems: 'center',
+        gap: 10,
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: -3 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
-
-        elevation: 5,
+        elevation: 8,
     },
     totalAmount: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: '600',
     },
     totalAmountPrice: {
-        fontSize: 22,
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'green',
+    },
+    checkoutBtn: {
+        marginTop: 10,
+        width: '90%',
+        height: 45,
+        backgroundColor: 'blue',
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    checkoutText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    emptyText: {
+        textAlign: 'center',
+        marginTop: 50,
+        fontSize: 18,
+        color: 'gray',
     },
 });
